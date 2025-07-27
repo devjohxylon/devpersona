@@ -6,6 +6,14 @@ const { z } = require('zod')
 const app = express()
 const port = process.env.PORT || 3001
 
+// Debug environment variables
+console.log('🔧 Environment Debug:')
+console.log('   PORT:', process.env.PORT || 'Not set (using 3001)')
+console.log('   NODE_ENV:', process.env.NODE_ENV || 'Not set')
+console.log('   DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
+console.log('   GITHUB_ID:', process.env.GITHUB_ID ? 'Set' : 'Not set')
+console.log('   GITHUB_SECRET:', process.env.GITHUB_SECRET ? 'Set' : 'Not set')
+
 // Middleware - More aggressive CORS handling
 app.use((req, res, next) => {
   // Set CORS headers for all requests
@@ -220,6 +228,17 @@ app.get('/api/auth/github', async (req, res) => {
 // Start server
 app.listen(port, () => {
   console.log(`🚀 Backend server running on port ${port}`)
+  console.log(`🌐 Server URL: http://localhost:${port}`)
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
+  console.log(`🔧 Available endpoints:`)
+  console.log(`   - GET  /health`)
+  console.log(`   - GET  /api/waitlist`)
+  console.log(`   - POST /api/waitlist`)
+  console.log(`   - GET  /api/admin/waitlist`)
+  console.log(`   - GET  /api/auth/github`)
+}).on('error', (error) => {
+  console.error('❌ Server failed to start:', error)
+  process.exit(1)
 })
 
 // Graceful shutdown
