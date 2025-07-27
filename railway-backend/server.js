@@ -91,7 +91,12 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'Railway Backend is running!',
     timestamp: new Date().toISOString(),
-    cors: 'enabled'
+    cors: 'enabled',
+    port: railwayPort,
+    railway: {
+      public: process.env.RAILWAY_PUBLIC_DOMAIN,
+      private: process.env.RAILWAY_PRIVATE_DOMAIN
+    }
   })
 })
 
@@ -249,7 +254,7 @@ app.get('/api/auth/github', async (req, res) => {
 })
 
 // Start server
-app.listen(railwayPort, '0.0.0.0', () => {
+const server = app.listen(railwayPort, '0.0.0.0', () => {
   console.log(`🚀 Backend server running on port ${railwayPort}`)
   console.log(`🌐 Server URL: http://0.0.0.0:${railwayPort}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
@@ -260,9 +265,20 @@ app.listen(railwayPort, '0.0.0.0', () => {
   console.log(`   - GET  /api/admin/waitlist`)
   console.log(`   - GET  /api/auth/github`)
   console.log(`✅ Server is listening and ready for requests!`)
+  console.log(`🔗 Railway URL: ${process.env.RAILWAY_PUBLIC_DOMAIN}`)
+  console.log(`🔗 Railway Private URL: ${process.env.RAILWAY_PRIVATE_DOMAIN}`)
 }).on('error', (error) => {
   console.error('❌ Server failed to start:', error)
   process.exit(1)
+})
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM received, shutting down gracefully')
+  server.close(() => {
+    console.log('✅ Server closed')
+    process.exit(0)
+  })
 })
 
 // Graceful shutdown
