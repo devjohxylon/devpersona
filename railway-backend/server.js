@@ -8,13 +8,21 @@ const prisma = new PrismaClient()
 app.use(express.json())
 
 // Initialize database
-prisma.$connect()
-  .then(() => {
+async function initializeDatabase() {
+  try {
+    await prisma.$connect()
     console.log('✅ Database connected successfully')
-  })
-  .catch((error) => {
-    console.log('⚠️ Database connection failed, continuing without database:', error.message)
-  })
+    
+    // Test database access
+    await prisma.waitlistEntry.count()
+    console.log('✅ Database schema is ready')
+  } catch (error) {
+    console.log('⚠️ Database initialization failed:', error.message)
+    console.log('💡 Make sure to run: npx prisma db push')
+  }
+}
+
+initializeDatabase()
 
 // Basic endpoints
 app.get('/', (req, res) => {
@@ -31,6 +39,9 @@ app.get('/api/waitlist', async (req, res) => {
     res.json({ count })
   } catch (error) {
     console.log('Database error, using fallback count:', error.message)
+    if (error.message.includes('does not exist')) {
+      console.log('💡 Database table missing. Run: npx prisma db push')
+    }
     res.json({ count: 1247 })
   }
 })
@@ -51,6 +62,9 @@ app.post('/api/waitlist', async (req, res) => {
     res.json({ success: true, message: 'Joined waitlist!' })
   } catch (error) {
     console.log('Database error, but continuing:', error.message)
+    if (error.message.includes('does not exist')) {
+      console.log('💡 Database table missing. Run: npx prisma db push')
+    }
     res.json({ success: true, message: 'Joined waitlist!' })
   }
 })

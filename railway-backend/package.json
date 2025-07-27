@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
-    "start": "npx prisma generate && node server.js",
-    "build": "echo 'No build step needed'"
+    "start": "npx prisma generate && npx prisma db push && node server.js",
+    "build": "echo 'No build step needed'",
+    "setup-db": "node setup-db.js"
   },
   "dependencies": {
     "express": "^4.18.2",
