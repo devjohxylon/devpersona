@@ -12,7 +12,26 @@ export default function WaitlistForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [waitlistCount, setWaitlistCount] = useState(1247)
+  const [waitlistCount, setWaitlistCount] = useState(0)
+
+  // Fetch waitlist count on component mount
+  useEffect(() => {
+    const fetchWaitlistCount = async () => {
+      try {
+        const response = await fetch('/api/waitlist')
+        if (response.ok) {
+          const data = await response.json()
+          setWaitlistCount(data.count)
+        }
+      } catch (error) {
+        console.error('Failed to fetch waitlist count:', error)
+        // Fallback to a reasonable number if API fails
+        setWaitlistCount(1247)
+      }
+    }
+
+    fetchWaitlistCount()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,11 +52,22 @@ export default function WaitlistForm() {
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      setIsSubmitted(true)
-      setWaitlistCount(prev => prev + 1)
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: validatedEmail }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setIsSubmitted(true)
+        setWaitlistCount(prev => prev + 1)
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.')
+      }
     } catch (err) {
       setError('Something went wrong. Please try again.')
     } finally {
