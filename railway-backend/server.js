@@ -14,6 +14,10 @@ console.log('   DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
 console.log('   GITHUB_ID:', process.env.GITHUB_ID ? 'Set' : 'Not set')
 console.log('   GITHUB_SECRET:', process.env.GITHUB_SECRET ? 'Set' : 'Not set')
 
+// Force use Railway's PORT
+const railwayPort = process.env.PORT || 3001
+console.log('🚂 Using Railway PORT:', railwayPort)
+
 // Middleware - Railway-specific CORS handling
 app.use((req, res, next) => {
   console.log(`🌐 Request: ${req.method} ${req.path} from ${req.headers.origin || 'unknown'}`);
@@ -237,9 +241,9 @@ app.get('/api/auth/github', async (req, res) => {
 })
 
 // Start server
-app.listen(port, () => {
-  console.log(`🚀 Backend server running on port ${port}`)
-  console.log(`🌐 Server URL: http://localhost:${port}`)
+app.listen(railwayPort, () => {
+  console.log(`🚀 Backend server running on port ${railwayPort}`)
+  console.log(`🌐 Server URL: http://localhost:${railwayPort}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`🔧 Available endpoints:`)
   console.log(`   - GET  /health`)
