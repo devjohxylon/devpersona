@@ -17,6 +17,12 @@ console.log('   GITHUB_SECRET:', process.env.GITHUB_SECRET ? 'Set' : 'Not set')
 // Force use Railway's PORT
 const railwayPort = process.env.PORT || 3001
 console.log('🚂 Using Railway PORT:', railwayPort)
+console.log('🔧 All environment variables:')
+Object.keys(process.env).forEach(key => {
+  if (key.includes('PORT') || key.includes('RAILWAY') || key.includes('NODE')) {
+    console.log(`   ${key}: ${process.env[key]}`)
+  }
+})
 
 // Middleware - Railway-specific CORS handling
 app.use((req, res, next) => {
@@ -241,9 +247,9 @@ app.get('/api/auth/github', async (req, res) => {
 })
 
 // Start server
-app.listen(railwayPort, () => {
+app.listen(railwayPort, '0.0.0.0', () => {
   console.log(`🚀 Backend server running on port ${railwayPort}`)
-  console.log(`🌐 Server URL: http://localhost:${railwayPort}`)
+  console.log(`🌐 Server URL: http://0.0.0.0:${railwayPort}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`🔧 Available endpoints:`)
   console.log(`   - GET  /health`)
@@ -251,6 +257,7 @@ app.listen(railwayPort, () => {
   console.log(`   - POST /api/waitlist`)
   console.log(`   - GET  /api/admin/waitlist`)
   console.log(`   - GET  /api/auth/github`)
+  console.log(`✅ Server is listening and ready for requests!`)
 }).on('error', (error) => {
   console.error('❌ Server failed to start:', error)
   process.exit(1)
