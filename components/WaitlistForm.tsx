@@ -18,7 +18,8 @@ export default function WaitlistForm() {
   useEffect(() => {
     const fetchWaitlistCount = async () => {
       try {
-        const response = await fetch('/api/waitlist')
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://devpersona-production.up.railway.app'
+        const response = await fetch(`${apiUrl}/api/waitlist`)
         if (response.ok) {
           const data = await response.json()
           setWaitlistCount(data.count)
@@ -52,7 +53,8 @@ export default function WaitlistForm() {
     setIsLoading(true)
     
     try {
-      const response = await fetch('/api/waitlist', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://devpersona-production.up.railway.app'
+      const response = await fetch(`${apiUrl}/api/waitlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
