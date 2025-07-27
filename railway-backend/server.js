@@ -33,26 +33,26 @@ Object.keys(process.env).forEach(key => {
   }
 })
 
-// Middleware - Railway-specific CORS handling
-app.use((req, res, next) => {
-  console.log(`🌐 Request: ${req.method} ${req.path} from ${req.headers.origin || 'unknown'}`);
-  
-  // Set CORS headers for ALL requests (including preflight)
-  res.header('Access-Control-Allow-Origin', 'https://www.devpersonality.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Origin, Accept');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
-  
-  // Handle preflight requests immediately
-  if (req.method === 'OPTIONS') {
-    console.log('✅ Preflight request handled');
-    res.status(200).end();
-    return;
-  }
-  
-  next();
-});
+// TEMPORARILY REMOVED CORS FOR TESTING
+// app.use((req, res, next) => {
+//   console.log(`🌐 Request: ${req.method} ${req.path} from ${req.headers.origin || 'unknown'}`);
+//   
+//   // Set CORS headers for ALL requests (including preflight)
+//   res.header('Access-Control-Allow-Origin', 'https://www.devpersonality.com');
+//   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Origin, Accept');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   res.header('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+//   
+//   // Handle preflight requests immediately
+//   if (req.method === 'OPTIONS') {
+//     console.log('✅ Preflight request handled');
+//     res.status(200).end();
+//     return;
+//   }
+//   
+//   next();
+// });
 
 // Remove the cors middleware since we're handling it manually
 // app.use(cors({...}))
