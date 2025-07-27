@@ -43,7 +43,12 @@ const waitlistSchema = z.object({
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    cors: 'enabled',
+    origins: ['https://devpersonality.com', 'https://www.devpersonality.com']
+  })
 })
 
 // Waitlist API
