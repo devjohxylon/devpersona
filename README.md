@@ -32,4 +32,4 @@ If you have any questions or need help, please open an issue on GitHub or contac
 
 ---
 
-**Made with ❤️ for the developer community** # Updated for Railway deployment with devpersonality.com domain
+**Made with ❤️ for the developer community**
