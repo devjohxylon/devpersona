@@ -13,8 +13,13 @@ app.use(cors({
     'https://www.devpersonality.com',
     'http://localhost:3000'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }))
+
+// Handle preflight requests
+app.options('*', cors())
 app.use(express.json())
 
 // Initialize Prisma
@@ -27,6 +32,7 @@ prisma.$connect()
   })
   .catch((error) => {
     console.error('❌ Database connection failed:', error)
+    console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
   })
 
 // Validation schemas
