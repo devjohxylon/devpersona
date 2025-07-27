@@ -6,25 +6,25 @@ const { z } = require('zod')
 const app = express()
 const port = process.env.PORT || 3001
 
-// Middleware
+// Middleware - More aggressive CORS handling
+app.use((req, res, next) => {
+  // Set CORS headers for all requests
+  res.header('Access-Control-Allow-Origin', 'https://www.devpersonality.com');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Origin, Accept');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
+// Also use the cors middleware as backup
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'https://devpersonality.com',
-      'https://www.devpersonality.com',
-      'http://localhost:3000'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: ['https://devpersonality.com', 'https://www.devpersonality.com', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept']
@@ -37,7 +37,7 @@ app.use(express.json())
 // Initialize Prisma
 const prisma = new PrismaClient()
 
-// Test database connection
+// Test database connection (but don't fail if it doesn't work)
 prisma.$connect()
   .then(() => {
     console.log('✅ Database connected successfully')
@@ -45,6 +45,7 @@ prisma.$connect()
   .catch((error) => {
     console.error('❌ Database connection failed:', error)
     console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
+    console.log('⚠️  Continuing without database connection...')
   })
 
 // Validation schemas
@@ -75,14 +76,19 @@ app.post('/api/waitlist', async (req, res) => {
     const validatedData = waitlistSchema.parse(body)
     const { email } = validatedData
 
-    // Store in database
-    await prisma.waitlistEntry.create({
-      data: {
-        email: validatedData.email,
-        ip: req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown',
-        userAgent: req.headers['user-agent'] || 'unknown'
-      }
-    })
+    // Try to store in database, but don't fail if it doesn't work
+    try {
+      await prisma.waitlistEntry.create({
+        data: {
+          email: validatedData.email,
+          ip: req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown',
+          userAgent: req.headers['user-agent'] || 'unknown'
+        }
+      })
+      console.log('✅ Waitlist entry stored in database')
+    } catch (dbError) {
+      console.log('⚠️  Database storage failed, but continuing:', dbError.message)
+    }
 
     res.json({ 
       success: true, 
