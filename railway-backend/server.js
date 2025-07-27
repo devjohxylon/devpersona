@@ -17,6 +17,11 @@ console.log('   GITHUB_SECRET:', process.env.GITHUB_SECRET ? 'Set' : 'Not set')
 // Force use Railway's PORT
 const railwayPort = process.env.PORT || 3001
 console.log('🚂 Using Railway PORT:', railwayPort)
+
+// Try different port configurations
+const portsToTry = [railwayPort, 3000, 8080, process.env.RAILWAY_PORT]
+console.log('🔧 Ports to try:', portsToTry)
+
 console.log('🔧 All environment variables:')
 Object.keys(process.env).forEach(key => {
   if (key.includes('PORT') || key.includes('RAILWAY') || key.includes('NODE')) {
@@ -96,8 +101,18 @@ app.get('/', (req, res) => {
     railway: {
       public: process.env.RAILWAY_PUBLIC_DOMAIN,
       private: process.env.RAILWAY_PRIVATE_DOMAIN
-    }
+    },
+    status: 'healthy'
   })
+})
+
+// Restart endpoint for Railway
+app.post('/restart', (req, res) => {
+  console.log('🔄 Restart requested');
+  res.json({ message: 'Restarting server...' })
+  setTimeout(() => {
+    process.exit(0)
+  }, 1000)
 })
 
 // Waitlist API
@@ -267,6 +282,7 @@ const server = app.listen(railwayPort, '0.0.0.0', () => {
   console.log(`✅ Server is listening and ready for requests!`)
   console.log(`🔗 Railway URL: ${process.env.RAILWAY_PUBLIC_DOMAIN}`)
   console.log(`🔗 Railway Private URL: ${process.env.RAILWAY_PRIVATE_DOMAIN}`)
+  console.log(`🎯 Ready to handle CORS requests from: https://www.devpersonality.com`)
 }).on('error', (error) => {
   console.error('❌ Server failed to start:', error)
   process.exit(1)
