@@ -14,32 +14,30 @@ console.log('   DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
 console.log('   GITHUB_ID:', process.env.GITHUB_ID ? 'Set' : 'Not set')
 console.log('   GITHUB_SECRET:', process.env.GITHUB_SECRET ? 'Set' : 'Not set')
 
-// Middleware - More aggressive CORS handling
+// Middleware - Railway-specific CORS handling
 app.use((req, res, next) => {
-  // Set CORS headers for all requests
+  console.log(`🌐 Request: ${req.method} ${req.path} from ${req.headers.origin || 'unknown'}`);
+  
+  // Set CORS headers for ALL requests (including preflight)
   res.header('Access-Control-Allow-Origin', 'https://www.devpersonality.com');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Origin, Accept');
   res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
   
-  // Handle preflight requests
+  // Handle preflight requests immediately
   if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
+    console.log('✅ Preflight request handled');
+    res.status(200).end();
     return;
   }
+  
   next();
 });
 
-// Also use the cors middleware as backup
-app.use(cors({
-  origin: ['https://devpersonality.com', 'https://www.devpersonality.com', 'http://localhost:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept']
-}))
-
-// Handle preflight requests
-app.options('*', cors())
+// Remove the cors middleware since we're handling it manually
+// app.use(cors({...}))
+// app.options('*', cors())
 app.use(express.json())
 
 // Initialize Prisma
@@ -64,11 +62,24 @@ const waitlistSchema = z.object({
 
 // Health check
 app.get('/health', (req, res) => {
+  console.log('🏥 Health check requested');
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
     cors: 'enabled',
-    origins: ['https://devpersonality.com', 'https://www.devpersonality.com']
+    origins: ['https://devpersonality.com', 'https://www.devpersonality.com'],
+    server: 'railway-backend',
+    port: port
+  })
+})
+
+// Simple test endpoint
+app.get('/', (req, res) => {
+  console.log('🏠 Root endpoint requested');
+  res.json({ 
+    message: 'Railway Backend is running!',
+    timestamp: new Date().toISOString(),
+    cors: 'enabled'
   })
 })
 
