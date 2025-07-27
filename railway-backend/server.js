@@ -54,14 +54,16 @@ app.use(express.json())
 const prisma = new PrismaClient()
 
 // Test database connection (but don't fail if it doesn't work)
+console.log('🔌 Attempting database connection...')
 prisma.$connect()
   .then(() => {
     console.log('✅ Database connected successfully')
   })
   .catch((error) => {
-    console.error('❌ Database connection failed:', error)
+    console.error('❌ Database connection failed:', error.message)
     console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set')
     console.log('⚠️  Continuing without database connection...')
+    console.log('💡 Server will work with fallback data')
   })
 
 // Validation schemas
