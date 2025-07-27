@@ -22,6 +22,15 @@ export class RateLimiter {
     const now = Date.now()
     const windowStart = now - this.config.windowMs
 
+    // If Redis is not available, allow all requests
+    if (!redisClient) {
+      return {
+        allowed: true,
+        remaining: 999,
+        resetTime: now + this.config.windowMs
+      }
+    }
+
     try {
       // Get current requests in window
       const requests = await redisClient.zRangeByScore(key, windowStart, '+inf')
@@ -62,6 +71,8 @@ export class RateLimiter {
 
   async resetLimit(identifier: string): Promise<void> {
     const key = `${this.config.keyPrefix}:${identifier}`
+    if (!redisClient) return
+    
     try {
       await redisClient.del(key)
     } catch (error) {
