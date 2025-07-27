@@ -22,6 +22,10 @@ console.log('🚂 Using Railway PORT:', railwayPort)
 const portsToTry = [railwayPort, 3000, 8080, process.env.RAILWAY_PORT]
 console.log('🔧 Ports to try:', portsToTry)
 
+// Try to use Railway's internal port if available
+const actualPort = process.env.RAILWAY_PORT || railwayPort
+console.log('🎯 Using actual port:', actualPort)
+
 console.log('🔧 All environment variables:')
 Object.keys(process.env).forEach(key => {
   if (key.includes('PORT') || key.includes('RAILWAY') || key.includes('NODE')) {
@@ -269,9 +273,9 @@ app.get('/api/auth/github', async (req, res) => {
 })
 
 // Start server
-const server = app.listen(railwayPort, '0.0.0.0', () => {
-  console.log(`🚀 Backend server running on port ${railwayPort}`)
-  console.log(`🌐 Server URL: http://0.0.0.0:${railwayPort}`)
+const server = app.listen(actualPort, '0.0.0.0', () => {
+  console.log(`🚀 Backend server running on port ${actualPort}`)
+  console.log(`🌐 Server URL: http://0.0.0.0:${actualPort}`)
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`)
   console.log(`🔧 Available endpoints:`)
   console.log(`   - GET  /health`)
