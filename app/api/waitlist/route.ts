@@ -21,11 +21,7 @@ export async function POST(request: NextRequest) {
     const { email } = validatedData
 
     // Log the waitlist submission
-    securityLogger.info('waitlist_submission', {
-      email: email.substring(0, 3) + '***@' + email.split('@')[1], // Partial email for privacy
-      ip: securityResult.context?.ip,
-      userAgent: securityResult.context?.userAgent
-    })
+    securityLogger.api.request('POST', '/api/waitlist', securityResult.context?.ip || 'unknown', securityResult.context?.userAgent || 'unknown')
 
     // Store in database if available
     try {
@@ -43,10 +39,7 @@ export async function POST(request: NextRequest) {
       await prisma.$disconnect()
     } catch (dbError) {
       // If database is not available, log but don't fail the request
-      securityLogger.warn('waitlist_database_unavailable', {
-        error: dbError instanceof Error ? dbError.message : 'Database error',
-        email: email.substring(0, 3) + '***@' + email.split('@')[1]
-      })
+      securityLogger.api.error('POST', '/api/waitlist', securityResult.context?.ip || 'unknown', dbError instanceof Error ? dbError : new Error('Database error'))
     }
 
     return NextResponse.json({ 
@@ -55,10 +48,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    securityLogger.error('waitlist_submission_error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      ip: securityResult.context?.ip
-    })
+    securityLogger.api.error('POST', '/api/waitlist', securityResult.context?.ip || 'unknown', error instanceof Error ? error : new Error('Unknown error'))
 
     if (error instanceof Error && error.message.includes('Invalid email')) {
       return NextResponse.json(
@@ -97,18 +87,13 @@ export async function GET(request: NextRequest) {
       await prisma.$disconnect()
     } catch (dbError) {
       // If database is not available, use fallback count
-      securityLogger.warn('waitlist_count_database_unavailable', {
-        error: dbError instanceof Error ? dbError.message : 'Database error'
-      })
+      securityLogger.api.error('GET', '/api/waitlist', 'unknown', dbError instanceof Error ? dbError : new Error('Database error'))
     }
 
     return NextResponse.json({ count })
 
   } catch (error) {
-    securityLogger.error('waitlist_count_error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      ip: securityResult.context?.ip
-    })
+    securityLogger.api.error('GET', '/api/waitlist', securityResult.context?.ip || 'unknown', error instanceof Error ? error : new Error('Unknown error'))
 
     return NextResponse.json(
       { error: 'Failed to get waitlist count' },
