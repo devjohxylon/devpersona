@@ -83,6 +83,44 @@ app.post('/api/waitlist', async (req, res) => {
   }
 })
 
+// Admin endpoint for waitlist data
+app.get('/api/admin/waitlist', async (req, res) => {
+  try {
+    // Check admin password
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Missing authorization header' })
+    }
+    
+    const password = authHeader.substring(7) // Remove 'Bearer ' prefix
+    const adminPassword = process.env.ADMIN_PASSWORD
+    
+    if (!adminPassword || password !== adminPassword) {
+      return res.status(401).json({ error: 'Invalid password' })
+    }
+    
+    // Fetch waitlist data
+    const entries = await prisma.waitlistEntry.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        email: true,
+        createdAt: true,
+        ip: true
+      }
+    })
+    
+    const total = await prisma.waitlistEntry.count()
+    
+    res.json({
+      total,
+      entries
+    })
+  } catch (error) {
+    console.log('Admin API error:', error.message)
+    res.status(500).json({ error: 'Failed to fetch waitlist data' })
+  }
+})
+
 // Start server
 const port = process.env.PORT || 3001
 app.listen(port, '0.0.0.0', () => {
