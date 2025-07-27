@@ -20,6 +20,15 @@ app.use(express.json())
 // Initialize Prisma
 const prisma = new PrismaClient()
 
+// Test database connection
+prisma.$connect()
+  .then(() => {
+    console.log('✅ Database connected successfully')
+  })
+  .catch((error) => {
+    console.error('❌ Database connection failed:', error)
+  })
+
 // Validation schemas
 const emailSchema = z.string().max(254, 'Email too long').transform(val => val.toLowerCase().trim())
 const waitlistSchema = z.object({
