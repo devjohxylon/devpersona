@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
-    "start": "npx prisma generate && npx prisma db push && node server.js",
+    "start": "node setup-db.js && node server.js",
     "build": "echo 'No build step needed'",
     "setup-db": "node setup-db.js"
   },
